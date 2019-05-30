@@ -5,8 +5,10 @@ import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.auth.Principal
 import io.ktor.auth.principal
+import io.ktor.features.origin
 import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.jackson
+import io.ktor.request.host
 import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.routing
@@ -25,7 +27,7 @@ fun httpServer(port: Int = 80): ApplicationEngine {
 			this.limit = 5
 			this.resetTime = Duration.ofSeconds(20L)
 			this.keyExtraction = {
-				this.context.principal<Principal>() ?: "anonymous"
+				this.call.request.origin.remoteHost
 			}
 		}
 		routing {
