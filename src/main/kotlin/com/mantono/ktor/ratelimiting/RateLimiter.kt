@@ -2,7 +2,8 @@ package com.mantono.ktor.ratelimiting
 
 import java.time.Duration
 import java.time.Instant
-import java.util.concurrent.Semaphore
+import java.util.*
+import kotlin.collections.HashMap
 
 class RateLimiter<in T: Any>(
 	val limit: Long = 1000,
@@ -10,8 +11,6 @@ class RateLimiter<in T: Any>(
 	initialSize: Int = 64
 ) {
 	private val records: MutableMap<T, Rate> = HashMap(initialSize)
-	//private val rateConsumption: Channel<T> = Channel(100)
-	private val start: Semaphore = Semaphore(1)
 	private var lastPurge: Instant = Instant.now()
 
 	tailrec fun consume(key: T): Rate {
@@ -96,6 +95,8 @@ data class Rate(
 	val resetsAt: Instant,
 	val remainingRequests: Long
 ) {
+	private val id: String = UUID.randomUUID().toString()
+
 	fun isDepleted(): Boolean = remainingRequests <= 0
 	fun consume(): Rate = if(isDepleted()) this else this.copy(remainingRequests = remainingRequests - 1)
 	fun isReset(time: Instant = Instant.now()): Boolean = resetsAt <= time
