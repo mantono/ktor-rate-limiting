@@ -3,6 +3,8 @@ package com.mantono.ktor.ratelimiting
 import java.time.Duration
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 import kotlin.collections.HashMap
 
 class RateLimiter<in T: Any>(
@@ -10,7 +12,7 @@ class RateLimiter<in T: Any>(
 	val resetTime: Duration = Duration.ofHours(1),
 	initialSize: Int = 64
 ) {
-	private val records: MutableMap<T, Rate> = HashMap(initialSize)
+	private val records: ConcurrentMap<T, Rate> = ConcurrentHashMap(initialSize)
 	private var lastPurge: Instant = Instant.now()
 
 	tailrec fun consume(key: T): Rate {
