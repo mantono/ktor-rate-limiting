@@ -1,10 +1,13 @@
 # ktor-rate-limiting
-[Ktor](https://ktor.io) feature for rate limiting
+[Ktor](https://ktor.io) feature for [rate limiting](https://blog.apisyouwonthate.com/what-is-api-rate-limiting-all-about-1819a390ab06).
+Limit the number of requests a user or client
+can make within a certain time period. When all requests has been consumed, [status code 429](https://http.cat/429)
+will be returned.
 
 ## Usage
 
 ### Minimum Working Example
-Just install feature `RateLimiting` 
+Just install feature `RateLimiting`, no config is required.
 ```kotlin
 fun main() {
 	embeddedServer(Netty, port = 80) {
