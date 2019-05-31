@@ -2,10 +2,8 @@ package com.mantono.ktor.ratelimiting
 
 import java.time.Duration
 import java.time.Instant
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import kotlin.collections.HashMap
 
 class RateLimiter<in T: Any>(
 	val limit: Long = 1000,
@@ -15,23 +13,17 @@ class RateLimiter<in T: Any>(
 	private val records: ConcurrentMap<T, Rate> = ConcurrentHashMap(initialSize)
 	private var lastPurge: Instant = Instant.now()
 
-	tailrec fun consume(key: T): Rate {
-		records.putIfAbsent(key, defaultRate())
-		val currentRate: Rate = records[key] ?: defaultRate()
-		val newRate: Rate = if(currentRate.isReset()) {
-			defaultRate().consume()
-		} else {
-			currentRate.consume()
+	fun consume(key: T): Rate {
+		records.compute(key) { _, rate: Rate? ->
+			val presentRate: Rate = rate?.resetIfNeeded(limit, resetTime) ?: defaultRate()
+			presentRate.consume()
 		}
 
-		return if(records.replace(key, currentRate, newRate)) {
-			if(timeToPurge()) {
-				purge()
-			}
-			newRate
-		} else {
-			consume(key)
+		if(timeToPurge()) {
+			purge()
 		}
+
+		return records[key]!!
 	}
 
 	suspend fun consume(
@@ -97,9 +89,10 @@ data class Rate(
 	val resetsAt: Instant,
 	val remainingRequests: Long
 ) {
-	private val id: String = UUID.randomUUID().toString()
-
 	fun isDepleted(): Boolean = remainingRequests <= 0
 	fun consume(): Rate = if(isDepleted()) this else this.copy(remainingRequests = remainingRequests - 1)
 	fun isReset(time: Instant = Instant.now()): Boolean = resetsAt <= time
+
+	fun resetIfNeeded(limit: Long, resetTime: Duration): Rate =
+		if(isReset()) Rate(Instant.now().plus(resetTime), limit) else this
 }
