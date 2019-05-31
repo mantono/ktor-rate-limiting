@@ -4,17 +4,14 @@
 ## Usage
 
 ### Minimum Working Example
-Just install feature `RateLimiting` and guard any code that should be
-rate limited inside a `rateLimited { ... }` block
+Just install feature `RateLimiting` 
 ```kotlin
 fun main() {
 	embeddedServer(Netty, port = 80) {
 		install(RateLimiting)
 		routing {
 			get("/") {
-				rateLimited {
-					call.respond(HttpStatusCode.OK)
-				}
+				call.respond(HttpStatusCode.OK)
 			}
 		}
 	}.start(wait = true)
@@ -36,9 +33,7 @@ fun main() {
 		}
 		routing {
 			get("/") {
-				rateLimited {
-					call.respond(HttpStatusCode.OK)
-				}
+				call.respond(HttpStatusCode.OK)
 			}
 		}
 	}.start(wait = true)
@@ -49,4 +44,5 @@ fun main() {
 request counter is rest
 - `keyExtraction` - a lambda function of type `PipelineContext<Unit, ApplicationCall>.() -> Any` which
 is used to determine what key in the request is used for determining ownership of request quota.
-By default the IP address of the request origin host is used
+By default the IP address of the request origin host is used, but it could be changed to example
+be determined on a user name or token present in the request.

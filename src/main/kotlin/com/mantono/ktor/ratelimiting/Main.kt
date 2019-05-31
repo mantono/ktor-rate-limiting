@@ -35,9 +35,7 @@ fun httpServer(port: Int = 80): ApplicationEngine {
 				call.respond(HttpStatusCode.OK)
 			}
 			get("/rateLimited1") {
-				rateLimited {
-					call.respond(HttpStatusCode.OK, "Rate limited")
-				}
+				call.respond(HttpStatusCode.OK, "Rate limited")
 			}
 		}
 	}

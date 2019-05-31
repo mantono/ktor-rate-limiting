@@ -1,8 +1,5 @@
 package com.mantono.ktor.ratelimiting
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.Semaphore
@@ -13,18 +10,31 @@ class RateLimiter<in T: Any>(
 	initialSize: Int = 64
 ) {
 	private val records: MutableMap<T, Rate> = HashMap(initialSize)
-	private val rateConsumption: Channel<T> = Channel(100)
+	//private val rateConsumption: Channel<T> = Channel(100)
 	private val start: Semaphore = Semaphore(1)
 	private var lastPurge: Instant = Instant.now()
 
-	suspend fun consume(key: T): Instant {
-		rateConsumption.send(key)
-		return resetsAt(key)
+	tailrec fun consume(key: T): Rate {
+		records.putIfAbsent(key, defaultRate())
+		val currentRate: Rate = records[key] ?: defaultRate()
+		val newRate: Rate = if(currentRate.isReset()) {
+			defaultRate().consume()
+		} else {
+			currentRate.consume()
+		}
+
+		return if(records.replace(key, currentRate, newRate)) {
+			if(timeToPurge()) {
+				purge()
+			}
+			newRate
+		} else {
+			consume(key)
+		}
 	}
 
 	suspend fun consume(
 		key: T,
-		onReject: suspend () -> Unit,
 		onAllow: suspend () -> Unit
 	): Boolean {
 		if(isTimeToReset(key)) {
@@ -35,12 +45,23 @@ class RateLimiter<in T: Any>(
 			onAllow()
 			true
 		} else {
-			onReject()
 			false
 		}
 	}
 
 	fun allow(key: T): Boolean = remaining(key) > 0 || isTimeToReset(key)
+
+	suspend fun ifAllowed(
+		key: T,
+		onAllow: suspend () -> Unit
+	): Boolean {
+		return if(allow(key)) {
+			onAllow()
+			true
+		} else {
+			false
+		}
+	}
 
 	fun resetsAt(key: T): Instant {
 		return records[key]?.resetsAt ?: Instant.now().plus(resetTime)
@@ -55,22 +76,6 @@ class RateLimiter<in T: Any>(
 	fun remaining(key: T): Long = records[key]?.remainingRequests ?: limit
 
 	operator fun get(key: T): Rate = records.getOrDefault(key, defaultRate())
-
-	fun start(coroutineScope: CoroutineScope) {
-		if(start.tryAcquire()) {
-			coroutineScope.launch { process() }
-		}
-	}
-
-	private tailrec suspend fun process() {
-		val consumer: T = rateConsumption.receive()
-		val newRate: Rate = records.getOrDefault(consumer, defaultRate()).consume()
-		records[consumer] = newRate
-		if(timeToPurge()) {
-			purge()
-		}
-		process()
-	}
 
 	private fun timeToPurge(): Boolean =
 		records.size > 100 && timeSinceLastPurge() > Duration.ofMinutes(20L)
