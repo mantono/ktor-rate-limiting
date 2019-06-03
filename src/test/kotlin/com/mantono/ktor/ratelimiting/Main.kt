@@ -1,14 +1,9 @@
 package com.mantono.ktor.ratelimiting
 
-import com.sun.xml.internal.ws.client.ContentNegotiation
 import io.ktor.application.call
 import io.ktor.application.install
-import io.ktor.auth.Principal
-import io.ktor.auth.principal
 import io.ktor.features.origin
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.jackson
-import io.ktor.request.host
 import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.routing
@@ -31,10 +26,7 @@ fun httpServer(port: Int = 80): ApplicationEngine {
 			}
 		}
 		routing {
-			get("/notRateLimited") {
-				call.respond(HttpStatusCode.OK)
-			}
-			get("/rateLimited1") {
+			get("/") {
 				call.respond(HttpStatusCode.OK, "Rate limited")
 			}
 		}
