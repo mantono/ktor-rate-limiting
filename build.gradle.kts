@@ -42,24 +42,10 @@ dependencies {
 	
 	// Logging
 	implementation("io.github.microutils", "kotlin-logging", "1.6.20")
-	// Enable for applications
-	// runtime("ch.qos.logback", "logback-classic", "1.2.3")
 
 	// Ktor
 	implementation("io.ktor", "ktor-server-core", Version.KTOR)
-	implementation("io.ktor", "ktor-server-netty", Version.KTOR)
-	implementation("io.ktor", "ktor-client-auth-basic", Version.KTOR)
-	implementation("io.ktor", "ktor-auth", Version.KTOR)
-	implementation("io.ktor", "ktor-jackson", Version.KTOR)
-
-	// Jackson
-	implementation("com.fasterxml.jackson.core", "jackson-core", Version.JACKSON)
-	implementation("com.fasterxml.jackson.module", "jackson-module-kotlin", Version.JACKSON)
-	implementation("com.fasterxml.jackson.datatype", "jackson-datatype-jsr310", Version.JACKSON)
-
-	// Other
-	implementation("com.mantono", "pyttipanna", "1.0.0")
-	implementation("com.auth0", "java-jwt", "3.7.0")
+	testCompile("io.ktor", "ktor-server-netty", Version.KTOR)
 
 	// Junit
 	testCompile("org.junit.jupiter", "junit-jupiter-api", Version.JUNIT)
