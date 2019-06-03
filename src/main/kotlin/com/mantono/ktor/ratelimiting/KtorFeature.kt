@@ -6,8 +6,8 @@ import io.ktor.application.ApplicationFeature
 import io.ktor.application.call
 import io.ktor.features.origin
 import io.ktor.http.HttpStatusCode
+import io.ktor.response.ApplicationSendPipeline
 import io.ktor.response.header
-import io.ktor.response.respond
 import io.ktor.util.AttributeKey
 import io.ktor.util.pipeline.PipelineContext
 import java.time.Duration
@@ -15,13 +15,13 @@ import java.time.Instant
 
 class RateLimiting private constructor(
 	internal val rateLimit: RateLimiter<Any>,
-	internal val keyExtraction: PipelineContext<Unit, ApplicationCall>.() -> Any
+	internal val keyExtraction: PipelineContext<*, ApplicationCall>.() -> Any
 ) {
 
 	class Configuration {
 		var limit: Long = 1000L
 		var resetTime: Duration = Duration.ofHours(1L)
-		var keyExtraction: PipelineContext<Unit, ApplicationCall>.() -> Any = {
+		var keyExtraction: PipelineContext<*, ApplicationCall>.() -> Any = {
 			this.call.request.origin.remoteHost
 		}
 	}
@@ -57,7 +57,7 @@ class RateLimiting private constructor(
 			val limiter: RateLimiter<Any> = RateLimiter(config.limit, config.resetTime)
 			val rateLimiting = RateLimiting(limiter, config.keyExtraction)
 
-			pipeline.intercept(ApplicationCallPipeline.Call) {
+			pipeline.sendPipeline.intercept(ApplicationSendPipeline.After) {
 				val key: Any = rateLimiting.keyExtraction(this)
 				val allow: Boolean = rateLimiting.rateLimit.allow(key)
 				rateLimiting.rateLimit.consume(key)
@@ -69,8 +69,10 @@ class RateLimiting private constructor(
 				if(!allow) {
 					val retryAt: Long = (rate.resetsAt.epochSecond - Instant.now().epochSecond).coerceAtLeast(0)
 					context.response.header(HEADER_RETRY, retryAt)
-					call.respond(HttpStatusCode.TooManyRequests)
+					context.response.status(HttpStatusCode.TooManyRequests)
 					finish()
+				} else {
+					proceed()
 				}
 			}
 
