@@ -15,6 +15,7 @@ plugins {
 	id("org.jetbrains.kotlin.jvm") version "1.3.21" apply true
 	id("java") apply true
 	id("maven") apply true
+	id("maven-publish")
 	id("idea") apply true
 }
 
@@ -24,7 +25,7 @@ application {
 
 group = "com.mantono"
 version = "0.1.0"
-description = "Rate limitre feature for Ktor"
+description = "Rate limiter feature for Ktor"
 
 defaultTasks = listOf("test")
 
@@ -73,9 +74,29 @@ tasks {
 		}
 	}
 
-
 	wrapper {
 		description = "Generates gradlew[.bat] scripts for faster execution"
 		gradleVersion = "5.2.1"
+	}
+}
+
+publishing {
+	repositories {
+		maven {
+			name = "GithubPackages"
+			url = uri("https://maven.pkg.github.com/mantono/${project.name}")
+			credentials {
+				username = "mantono"
+				password = System.getenv("GITHUB_TOKEN")
+			}
+		}
+	}
+	publications {
+		register("gpr", MavenPublication::class) {
+			this.artifactId = project.name
+			this.groupId = project.group.toString()
+			this.version = project.version.toString()
+			from(components["java"])
+		}
 	}
 }
