@@ -10,14 +10,14 @@ will be returned.
 Just install feature `RateLimiting`, no config is required.
 ```kotlin
 fun main() {
-	embeddedServer(Netty, port = 80) {
-		install(RateLimiting)
-		routing {
-			get("/") {
-				call.respond(HttpStatusCode.OK)
-			}
-		}
-	}.start(wait = true)
+    embeddedServer(Netty, port = 80) {
+        install(RateLimiting)
+        routing {
+            get("/") {
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+    }.start(wait = true)
 }
 ```
 
@@ -26,23 +26,23 @@ The example below shows what parameters can be configured for the feature.
 Displayed values are the default values.
 ```kotlin
 fun main() {
-	embeddedServer(Netty, port = 80) {
-		install(RateLimiting) {
-			this.limit = 1000
-			this.resetTime = Duration.ofHours(1L)
-			this.keyExtraction = {
-				this.call.request.origin.remoteHost
-			}
-			this.pathExclusion = { method: HttpMethod, path: String ->
-				method == HttpMethod.Options || path.endsWith("/healthz") || path.endsWith("/readyz")
-			}
-		}
-		routing {
-			get("/") {
-				call.respond(HttpStatusCode.OK)
-			}
-		}
-	}.start(wait = true)
+    embeddedServer(Netty, port = 80) {
+        install(RateLimiting) {
+            this.limit = 1000
+            this.resetTime = Duration.ofHours(1L)
+            this.keyExtraction = {
+                this.call.request.origin.remoteHost
+            }
+            this.pathExclusion = { method: HttpMethod, path: String ->
+                method == HttpMethod.Options || path.endsWith("/healthz") || path.endsWith("/readyz")
+            }
+        }
+        routing {
+            get("/") {
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+    }.start(wait = true)
 }
 ```
 - `limit` - the amount of requests that can be done before the request is denied
