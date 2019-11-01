@@ -47,7 +47,7 @@ fun main() {
 ```
 - `limit` - the amount of requests that can be done before the request is denied
 - `resetTime` - how long time that will elapse from the first request until the
-request counter is rest
+request counter is reset
 - `keyExtraction` - a lambda function of type `PipelineContext<Unit, ApplicationCall>.() -> Any` which
 is used to determine what key in the request is used for determining ownership of request quota.
 By default the IP address of the request origin host is used, but it could be changed to example
