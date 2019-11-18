@@ -1,8 +1,8 @@
 object Version {
-	const val KOTLIN = "1.3.31"
-	const val KTOR = "1.2.1"
+	const val KOTLIN = "1.3.60"
+	const val KTOR = "1.2.5"
 	const val JVM = "1.8"
-	const val COROUTINES = "1.2.1"
+	const val COROUTINES = "1.3.2"
 	const val JUNIT = "5.3.2"
 }
 
