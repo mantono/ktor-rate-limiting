@@ -4,7 +4,6 @@ object Version {
 	const val JVM = "1.8"
 	const val COROUTINES = "1.2.1"
 	const val JUNIT = "5.3.2"
-	const val JACKSON = "2.9.8"
 }
 
 plugins {
