@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test
 import java.time.Duration
 
 class RateLimiterTest {
-
-
 	@Test
 	fun stampRateLimiterTest() {
 		val job = Job()

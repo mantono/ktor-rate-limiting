@@ -46,7 +46,7 @@ dependencies {
 
 	// Ktor
 	implementation("io.ktor", "ktor-server-core", Version.KTOR)
-	testCompile("io.ktor", "ktor-server-netty", Version.KTOR)
+	testCompile("io.ktor", "ktor-server-test-host", Version.KTOR)
 
 	// Junit
 	testCompile("org.junit.jupiter", "junit-jupiter-api", Version.JUNIT)
