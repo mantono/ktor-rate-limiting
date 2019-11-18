@@ -9,7 +9,7 @@ jobs:
         id: cache-gradle
         with:
           path: ~/.gradle
-          key: gradle-${{ hashFiles('build.gradle.kts') }}
+          key: gradle-${{ hashFiles('build.gradle.kts') }}-${{ hashFiles('.github/workflows') }}
       - name: Resolve dependencies
         if: steps.cache-gradle.output.cache-hit != 'true'
         run: gradle --no-daemon dependencies
