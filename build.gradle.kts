@@ -26,7 +26,7 @@ group = "com.mantono"
 version = "0.1.0"
 description = "Rate limiter feature for Ktor"
 
-defaultTasks = listOf("test")
+defaultTasks = mutableListOf("test")
 
 repositories {
 	mavenLocal()
